@@ -1,0 +1,145 @@
+// Helix — Prisma schema
+// Mirrors the data model defined in plan.md, Section 9.
+// pgvector extension is enabled via `postgresqlExtensions` (Prisma preview feature).
+// The `embedding` column is declared with Prisma's `Unsupported(...)` type because
+// Prisma has no native vector type; the actual column type and its ivfflat/hnsw
+// index are created in a raw-SQL migration step (see prisma/migrations).
+
+generator client {
+  provider        = "prisma-client-js"
+  previewFeatures = ["postgresqlExtensions"]
+}
+
+datasource db {
+  provider   = "postgresql"
+  url        = env("DATABASE_URL")
+  extensions = [vector]
+}
+
+enum EntityType {
+  SKILL
+  PROJECT
+  CERTIFICATION
+  INTERNSHIP
+  ACHIEVEMENT
+}
+
+enum DepthTier {
+  EXPOSURE
+  WORKING_KNOWLEDGE
+  DEMONSTRATED_MASTERY
+}
+
+enum RelationshipType {
+  CERTIFIES
+  APPLIES_TO
+  LED_TO
+}
+
+enum SourceChannel {
+  MANUAL_UPLOAD
+  TELEGRAM
+  GITHUB
+  EMAIL
+}
+
+model User {
+  id              String   @id @default(uuid())
+  email           String   @unique
+  passwordHash    String   @map("password_hash")
+  telegramChatId  String?  @map("telegram_chat_id")
+  githubUsername  String?  @map("github_username")
+  createdAt       DateTime @default(now()) @map("created_at")
+
+  documents       Document[]
+  entities        Entity[]
+  timelineEvents  TimelineEvent[]
+
+  @@map("users")
+}
+
+model Document {
+  id                 String        @id @default(uuid())
+  userId             String        @map("user_id")
+  fileUrl            String        @map("file_url")
+  extractedText      String?       @map("extracted_text")
+  category           String?
+  confidenceScore    Float?        @map("confidence_score")
+  verifiabilityScore Float?        @map("verifiability_score")
+  needsReview        Boolean       @default(false) @map("needs_review")
+  sourceChannel      SourceChannel @default(MANUAL_UPLOAD) @map("source_channel")
+  // embedding vector(768) — added via raw-SQL migration; see Section 11 note above.
+  embedding          Unsupported("vector(768)")?
+  createdAt          DateTime      @default(now()) @map("created_at")
+
+  user             User               @relation(fields: [userId], references: [id], onDelete: Cascade)
+  documentEntities DocumentEntity[]
+  timelineEvents   TimelineEvent[]
+
+  @@index([userId])
+  @@map("documents")
+}
+
+model Entity {
+  id        String     @id @default(uuid())
+  userId    String     @map("user_id")
+  type      EntityType
+  name      String
+  depthScore Float     @default(0) @map("depth_score")
+  depthTier  DepthTier @default(EXPOSURE) @map("depth_tier")
+  updatedAt  DateTime  @updatedAt @map("updated_at")
+
+  user             User               @relation(fields: [userId], references: [id], onDelete: Cascade)
+  documentEntities DocumentEntity[]
+  outgoingEdges    Relationship[]     @relation("SourceEntity")
+  incomingEdges    Relationship[]     @relation("TargetEntity")
+
+  @@index([userId])
+  @@unique([userId, type, name])
+  @@map("entities")
+}
+
+// Join table: which document is evidence for which entity.
+// This is the direct input to the deterministic depth-score formula (plan.md, Section 6).
+model DocumentEntity {
+  id           String   @id @default(uuid())
+  documentId   String   @map("document_id")
+  entityId     String   @map("entity_id")
+  evidenceType EntityType @map("evidence_type")
+  evidenceDate DateTime @map("evidence_date")
+
+  document Document @relation(fields: [documentId], references: [id], onDelete: Cascade)
+  entity   Entity   @relation(fields: [entityId], references: [id], onDelete: Cascade)
+
+  @@index([entityId])
+  @@map("document_entities")
+}
+
+model Relationship {
+  id               String           @id @default(uuid())
+  sourceEntityId   String           @map("source_entity_id")
+  targetEntityId   String           @map("target_entity_id")
+  type             RelationshipType
+  weight           Float            @default(1.0)
+  lastReinforcedAt DateTime         @default(now()) @map("last_reinforced_at")
+
+  sourceEntity Entity @relation("SourceEntity", fields: [sourceEntityId], references: [id], onDelete: Cascade)
+  targetEntity Entity @relation("TargetEntity", fields: [targetEntityId], references: [id], onDelete: Cascade)
+
+  @@unique([sourceEntityId, targetEntityId, type])
+  @@map("relationships")
+}
+
+model TimelineEvent {
+  id               String   @id @default(uuid())
+  userId           String   @map("user_id")
+  eventDate        DateTime @map("event_date")
+  narrative        String
+  linkedDocumentId String?  @map("linked_document_id")
+
+  user           User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  linkedDocument Document? @relation(fields: [linkedDocumentId], references: [id], onDelete: SetNull)
+
+  @@index([userId])
+  @@map("timeline_events")
+}

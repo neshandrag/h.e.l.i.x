@@ -1,0 +1,143 @@
+Here's the hackathon laid out clearly:
+Overview
+
+Event: MemoryVerse AI '26 (on Wooble platform)
+Theme: Build an AI-powered "Digital Identity System" that automatically organizes, connects, and makes searchable a person's scattered documents (certificates, resumes, project reports, internship letters, portfolios, etc.)
+Track: Intermediate
+Format: Evaluation only (no live pitching)
+Deadline: Closes 25 Jul 2026 (7 days from now)
+Results: 30 Jul 2026
+Prize: ₹3,000 total + Wooble Productivity Kit (bottle, diary, pen, notepad) for top 3, plus a participation certificate for everyone who submits
+
+The Core Idea
+Not just cloud storage — the system should understand a user's growth journey and connect the dots between their documents automatically.
+What You Need to Build (5 Modules)
+
+AI Data Ingestion — Let users upload certificates, resumes, project reports, internship letters, portfolio links, and other academic/professional docs.
+Intelligent Categorization — Auto-classify uploads into categories: Projects, Skills, Certifications, Internships, Achievements, Academics.
+Relationship Engine — Connect related data automatically, e.g.:
+
+Certification → Skill
+Skill → Project
+Project → Internship
+Internship → Career Path
+
+
+Digital Journey Timeline — Visual timeline of growth (e.g., 2023: Python Cert → 2024: Club Lead → 2025: Internship → 2026: AI/ML Portfolio).
+Smart Retrieval System — Natural language search like "show all my certificates" or "show my AI projects," with original files always accessible.
+
+Success test: a student should say "I never have to search through folders again."
+Deliverables (all 4 required)
+
+Working prototype or demo video
+GitHub repository with README
+AI workflow / architecture diagram
+Thought process sheet
+
+Accepted formats: File Upload, URL/Live Link, Written Response, Code Repository.
+What Reviewers Look For
+NLP, RAG, embeddings, vector databases, semantic search.
+Evaluation Criteria
+CriteriaWeightQuality of AI organization, categorization & retrieval40%Use of AI/ML techniques (embeddings, NLP, semantic search, knowledge mapping)25%Innovation, usefulness, UX20%Clarity of explanation, architecture, thought process15%
+The brief
+Every student builds a digital footprint throughout their academic and professional journey.
+
+Certificates, resumes, project reports, internship letters, portfolios, GitHub repositories, achievements, and learning records accumulate over time. Yet most of this information remains scattered across folders, emails, cloud drives, and devices.
+
+As years pass, valuable experiences become difficult to locate, connect, and showcase.
+
+Traditional storage platforms can save files, but they cannot understand a person's journey.
+
+Your challenge is to build an AI-powered Digital Identity System that transforms fragmented data into a structured, searchable, and intelligent knowledge repository.
+
+The system should automatically understand, organize, categorize, and connect information while preserving original files and formats.
+
+This is not another cloud storage platform.
+
+This is a system that understands a person's growth, achievements, skills, and experiences—and makes them instantly accessible.
+
+01
+Key Questions to Solve
+02
+1. Intelligent Organization
+Can the system automatically organize uploaded content without requiring manual sorting?
+
+03
+2. Knowledge Connections
+Can the system identify and connect related information such as skills, projects, certifications, internships, and achievements?
+
+04
+3. Instant Retrieval
+Can users retrieve any document or information instantly without searching through multiple folders?
+
+What to Build
+06
+Module 1: AI Data Ingestion
+Allow users to upload:
+
+Certificates
+Resumes
+Project Reports
+Internship Letters
+Portfolio Links
+Other Academic or Professional Documents
+07
+Module 2: Intelligent Categorization
+The system should automatically classify uploaded information into meaningful categories such as:
+
+Projects
+Skills
+Certifications
+Internships
+Achievements
+Academics
+08
+Module 3: Relationship Engine
+Build an AI layer that identifies and connects relationships across user data.
+
+Examples:
+
+Certification → Skill
+Skill → Project
+Project → Internship
+Internship → Career Path
+09
+Module 4: Digital Journey Timeline
+Generate a visual timeline representing the user's growth and achievements.
+
+Example:
+
+2023 → Python Certification
+2024 → Data Science Club Lead
+2025 → Internship at XYZ
+2026 → AI/ML Project Portfolio
+10
+Module 5: Smart Retrieval System
+Enable users to instantly access their original data through natural search.
+
+Examples:
+
+Show all my certificates
+Show my AI projects
+Show internship documents
+Show my latest resume
+All files should remain accessible in their original format.
+
+Success Metric
+The defining moment of your demo should make a student say:
+
+"I never have to search through folders again."
+
+The strongest solutions will not simply store information.
+
+They will create an intelligent digital identity that understands and represents a person's journey.
+
+Deliverables
+Upload your working prototype or demo video, GitHub repository with README, AI workflow or architecture diagram, and thought process sheet to your Wooble portfolio. All 4 must be submitted for evaluation.
+Accepted Formats: File Upload, URL / Live Link, Written Response, Code Repository
+What Reviewers Might Look For: NLP, RAG, Embeddings, Vector Databases, Semantic Search
+Evaluation criteria
+Quality of AI organization, categorization, and information retrieval (40%)
+Use of AI/ML techniques such as embeddings, NLP, semantic search, or knowledge mapping (25%)
+Innovation, usefulness, and user experience (20%)
+Clarity of explanation, architecture, and thought process (15%)
