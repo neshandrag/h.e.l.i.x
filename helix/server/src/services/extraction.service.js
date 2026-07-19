@@ -1,4 +1,4 @@
-const pdfParse = require('pdf-parse');
+const { extractText: extractPdfText } = require('unpdf');
 const mammoth = require('mammoth');
 const Tesseract = require('tesseract.js');
 
@@ -7,7 +7,7 @@ const DOCX_MIME = 'application/vnd.openxmlformats-officedocument.wordprocessingm
 
 async function extractText(buffer, mimeType) {
   if (mimeType === PDF_MIME) {
-    const { text } = await pdfParse(buffer);
+    const { text } = await extractPdfText(new Uint8Array(buffer), { mergePages: true });
     return text;
   }
 

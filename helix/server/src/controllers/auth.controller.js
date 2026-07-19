@@ -5,6 +5,7 @@ const prisma = require('../config/prisma');
 const env = require('../config/env');
 const ApiError = require('../utils/ApiError');
 const asyncHandler = require('../utils/asyncHandler');
+const { generateCode } = require('../utils/telegramLinkCodes');
 
 const SALT_ROUNDS = 12;
 
@@ -42,4 +43,16 @@ const login = asyncHandler(async (req, res) => {
   res.json({ token: signToken(user.id), user: { id: user.id, email: user.email } });
 });
 
-module.exports = { register, login };
+// Generates a short-lived one-time code the user sends to the Helix Telegram
+// bot as "/link <code>" to connect that chat as an ingestion channel
+// (plan.md Section 6, Module 1; see telegram.service.js and telegramLinkCodes.js).
+const telegramLinkCode = asyncHandler(async (req, res) => {
+  if (!env.TELEGRAM_BOT_TOKEN) {
+    throw new ApiError(503, 'Telegram ingestion is not configured on this server (missing TELEGRAM_BOT_TOKEN)');
+  }
+
+  const code = generateCode(req.userId);
+  res.json({ code, expiresInSeconds: 600, instructions: 'In Telegram, message the Helix bot: /link ' + code });
+});
+
+module.exports = { register, login, telegramLinkCode };

@@ -51,8 +51,12 @@ const generateContent = asyncHandler(async (req, res) => {
   });
   if (!event) throw new ApiError(404, 'Timeline event not found');
 
-  const content = await generateReusableContent(req.body.kind, event.narrative);
-  res.json({ content });
+  try {
+    const content = await generateReusableContent(req.body.kind, event.narrative);
+    res.json({ content });
+  } catch (err) {
+    throw new ApiError(503, err.message);
+  }
 });
 
 module.exports = {

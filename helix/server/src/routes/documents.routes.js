@@ -1,7 +1,7 @@
 const { Router } = require('express');
 const multer = require('multer');
 const { requireAuth } = require('../middleware/auth.middleware');
-const { upload, list, getById } = require('../controllers/documents.controller');
+const { upload, list, getById, reclassify, githubImport, githubImportValidators } = require('../controllers/documents.controller');
 
 const ALLOWED_MIME_TYPES = new Set([
   'application/pdf',
@@ -25,7 +25,9 @@ const router = Router();
 
 router.use(requireAuth);
 router.post('/', multerUpload.single('file'), upload);
+router.post('/github-import', githubImportValidators, githubImport);
 router.get('/', list);
 router.get('/:id', getById);
+router.post('/:id/reclassify', reclassify);
 
 module.exports = router;

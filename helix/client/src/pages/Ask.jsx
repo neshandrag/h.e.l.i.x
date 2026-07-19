@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import api from '../lib/api';
 import PageTransition from '../components/PageTransition';
+import LoadingState from '../components/LoadingState';
 
 const SUGGESTIONS = [
   'Show my AI projects',
@@ -30,13 +31,14 @@ export default function Ask() {
   return (
     <PageTransition>
       <header className="mb-6">
-        <h1 className="text-2xl font-semibold text-ink-50">Ask your identity</h1>
-        <p className="text-sm text-ink-400 mt-1">
-          Natural-language retrieval over your documents and growth graph — evidence-based, not a plain file list.
-        </p>
+        <h1 className="font-display text-2xl sm:text-3xl font-semibold uppercase tracking-tight text-ink-100">
+          Ask Your Identity
+        </h1>
+        <p className="text-sm text-ink-400 mt-2">Ask anything. Get evidence-based answers.</p>
+        <div className="glow-divider mt-6" />
       </header>
 
-      <div className="glass-panel rounded-2xl p-4 flex gap-2 mb-3">
+      <div className="glass-panel rounded-full pl-6 pr-2 py-2 flex items-center gap-2 mb-3 mt-6">
         <input
           value={question}
           onChange={(e) => setQuestion(e.target.value)}
@@ -46,9 +48,10 @@ export default function Ask() {
         />
         <motion.button
           whileTap={{ scale: 0.96 }}
+          whileHover={{ scale: 1.02 }}
           onClick={() => ask()}
           disabled={loading}
-          className="rounded-lg bg-gradient-to-r from-violet-500 to-cyan-400 text-ink-950 text-sm font-medium px-4 py-2 disabled:opacity-60"
+          className="btn-glass-primary rounded-full text-sm font-medium px-5 py-2.5 disabled:opacity-60"
         >
           {loading ? 'Thinking…' : 'Ask'}
         </motion.button>
@@ -62,26 +65,28 @@ export default function Ask() {
               setQuestion(s);
               ask(s);
             }}
-            className="text-[11px] px-2.5 py-1 rounded-full border border-white/10 text-ink-300 hover:border-violet-400/40 transition-colors"
+            className="btn-glass text-[11px] px-2.5 py-1 rounded-full"
           >
             {s}
           </button>
         ))}
       </div>
 
+      {loading && <LoadingState label="Reasoning over your evidence…" />}
+
       <AnimatePresence>
-        {result && (
+        {!loading && result && (
           <motion.div
             initial={{ opacity: 0, y: 12 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0 }}
-            className="glass-panel rounded-2xl p-6"
+            className="capsule-panel p-7"
           >
             <p className="text-sm text-ink-50 leading-relaxed">{result.answer}</p>
 
             {result.supportingDocuments?.length > 0 && (
               <div className="mt-5">
-                <p className="text-xs text-ink-400 mb-2">Supporting evidence</p>
+                <p className="text-xs text-ink-400 mb-2">Supporting Evidence</p>
                 <div className="flex flex-col gap-1.5">
                   {result.supportingDocuments.map((d) => (
                     <a

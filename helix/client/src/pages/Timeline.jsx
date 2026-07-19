@@ -2,6 +2,8 @@ import { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import api from '../lib/api';
 import PageTransition from '../components/PageTransition';
+import LoadingState from '../components/LoadingState';
+import EmptyState from '../components/EmptyState';
 
 function GenerateButton({ eventId, kind, label }) {
   const [output, setOutput] = useState('');
@@ -19,21 +21,15 @@ function GenerateButton({ eventId, kind, label }) {
 
   return (
     <div className="mt-2">
-      <button
-        onClick={generate}
-        disabled={loading}
-        className="text-[11px] px-2.5 py-1 rounded-full border border-violet-400/30 text-violet-300 hover:bg-violet-400/10 transition-colors"
-      >
+      <button onClick={generate} disabled={loading} className="btn-glass text-[11px] px-2.5 py-1 rounded-full">
         {loading ? 'Generating…' : label}
       </button>
       {output && (
-        <motion.p
-          initial={{ opacity: 0, height: 0 }}
-          animate={{ opacity: 1, height: 'auto' }}
-          className="text-xs text-ink-300 mt-2 glass-panel rounded-lg p-3"
-        >
-          {output}
-        </motion.p>
+        <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} className="mt-2">
+          <div className="glass-panel rounded-[var(--radius-capsule)] p-4">
+            <p className="text-xs text-ink-300">{output}</p>
+          </div>
+        </motion.div>
       )}
     </div>
   );
@@ -53,30 +49,29 @@ export default function Timeline() {
   return (
     <PageTransition>
       <header className="mb-8">
-        <h1 className="text-2xl font-semibold text-ink-50">Digital journey timeline</h1>
-        <p className="text-sm text-ink-400 mt-1">
-          Your growth, narrated — and ready to reuse as a resume bullet or a post.
-        </p>
+        <h1 className="font-display text-2xl sm:text-3xl font-semibold uppercase tracking-tight text-ink-100">
+          Digital Journey Timeline
+        </h1>
+        <p className="text-sm text-ink-400 mt-2">Your growth, narrated automatically.</p>
+        <div className="glow-divider mt-6" />
       </header>
 
       {loading ? (
-        <p className="text-sm text-ink-400">Loading…</p>
+        <LoadingState label="Assembling your timeline…" />
       ) : events.length === 0 ? (
-        <p className="text-sm text-ink-400">
-          No milestones yet — generate one from a document on the Documents page.
-        </p>
+        <EmptyState label="No milestones recorded yet. Generate one from a document on the Documents page." />
       ) : (
-        <ol className="relative border-l border-white/10 ml-3">
+        <ol className="relative ml-3 before:content-[''] before:absolute before:left-0 before:top-0 before:bottom-0 before:w-px before:bg-gradient-to-b before:from-violet-400/60 before:via-periwinkle-400/50 before:to-transparent">
           {events.map((event, i) => (
             <motion.li
               key={event.id}
               initial={{ opacity: 0, x: -12 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ delay: i * 0.06 }}
-              className="mb-8 ml-6"
+              className="relative mb-8 ml-6"
             >
-              <span className="absolute -left-[7px] w-3.5 h-3.5 rounded-full bg-gradient-to-r from-violet-500 to-cyan-400" />
-              <p className="text-xs text-ink-400">
+              <span className="absolute -left-[31px] top-0.5 w-3 h-3 rounded-full bg-gradient-to-r from-violet-500 to-periwinkle-400 shadow-[0_0_10px_2px_rgba(123,167,252,0.55)]" />
+              <p className="text-xs text-ink-400 font-display tracking-wide uppercase">
                 {new Date(event.eventDate).toLocaleDateString(undefined, { year: 'numeric', month: 'long' })}
               </p>
               <p className="text-sm text-ink-50 mt-1">{event.narrative}</p>

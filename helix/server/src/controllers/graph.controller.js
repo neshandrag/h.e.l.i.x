@@ -1,5 +1,6 @@
 const prisma = require('../config/prisma');
 const asyncHandler = require('../utils/asyncHandler');
+const { computeCoherence } = require('../services/coherence.service');
 
 // Returns nodes/edges for the React Flow relationship graph (Module 3), including
 // each entity's deterministic depth score/tier and each edge's decayed weight.
@@ -40,4 +41,12 @@ const getGaps = asyncHandler(async (req, res) => {
   res.json({ gaps: entities });
 });
 
-module.exports = { getGraph, getGaps };
+// Coherence scoring (plan.md Section 6, Module 3): qualitative LLM assessment
+// of whether the user's documented path forms a consistent progression,
+// kept explicitly separate from the deterministic depth score above.
+const getCoherence = asyncHandler(async (req, res) => {
+  const coherence = await computeCoherence(req.userId);
+  res.json(coherence);
+});
+
+module.exports = { getGraph, getGaps, getCoherence };

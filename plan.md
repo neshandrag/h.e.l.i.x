@@ -1,16 +1,15 @@
 # Helix — AI-Powered Digital Identity System
 ### Technical Proposal & Implementation Plan
-**Event:** MemoryVerse AI '26 (Wooble Platform) · **Track:** Intermediate · **Format:** Evaluation Only
 
 ---
 
 ## 1. Document Purpose
 
-This document is the formal technical proposal for **Helix**, prepared in direct response to the hackathon problem statement recorded in `reference.txt`. It covers problem analysis, proposed solution, functional requirement mapping, system architecture, technology justification, development methodology, known technical constraints, and explicit alignment with the stated evaluation criteria. All requirements referenced below are sourced from `reference.txt` and are treated as the binding specification for this project.
+This document is the formal technical proposal for **Helix**, prepared in direct response to the problem statement recorded in `reference.txt`. It covers problem analysis, proposed solution, functional requirement mapping, system architecture, technology justification, development methodology, known technical constraints, and explicit alignment with the stated evaluation criteria. All requirements referenced below are sourced from `reference.txt` and are treated as the binding specification for this project.
 
 ---
 
-## 2. Problem Statement (per hackathon brief)
+## 2. Problem Statement (per project brief)
 
 As specified in `reference.txt`:
 
@@ -72,7 +71,7 @@ Helix is designed to satisfy all three gaps using the specific AI techniques the
 **Objective:** Accept and normalize heterogeneous input formats with minimal manual effort.
 **Implementation:**
 - REST upload endpoint (`multipart/form-data` via Multer) supporting PDF, DOCX, PNG/JPG.
-- Text extraction: `pdf-parse` (PDF), `mammoth` (DOCX), `Tesseract.js` OCR (scanned images/certificates).
+- Text extraction: `unpdf` (PDF), `mammoth` (DOCX), `Tesseract.js` OCR (scanned images/certificates).
 - Secondary ingestion channels to reduce upload friction:
   - **Telegram Bot API** integration — a document forwarded to the bot is ingested automatically.
   - **GitHub REST API** (via Octokit) — connecting a GitHub account extracts repository README content, commit history, and language statistics as skill evidence.
@@ -137,7 +136,7 @@ Helix is designed to satisfy all three gaps using the specific AI techniques the
 
 ## 7. Technology Stack
 
-All components below are available at zero cost at hackathon scale.
+All components below are available at zero cost at the current usage scale.
 
 | Layer | Technology | Justification |
 |---|---|---|
@@ -149,14 +148,14 @@ All components below are available at zero cost at hackathon scale.
 | HTTP client | Axios | Standard promise-based client for API communication |
 | Backend runtime | Node.js + Express.js | Minimal, well-documented REST layer; hosts scheduled jobs and channel webhooks (Telegram) |
 | Database | **PostgreSQL** (hosted free via **Supabase**, 500 MB) | Relational integrity for the graph/join-table model; no artificial per-project index cap |
-| Vector search | **pgvector** extension (bundled free on Supabase, all tiers) | Native SQL cosine-similarity search; comfortably handles the vector volume of a hackathon-scale dataset within the 500 MB free allowance |
+| Vector search | **pgvector** extension (bundled free on Supabase, all tiers) | Native SQL cosine-similarity search; comfortably handles the vector volume of a small-to-medium dataset within the 500 MB free allowance |
 | ORM | Prisma | Type-safe schema/migrations, widely adopted in current Node.js/Postgres projects |
 | Authentication | JWT + bcrypt | Stateless, industry-standard auth, framework-agnostic |
 | File storage | Cloudinary (free tier, 25 GB) | Stores original uploaded documents/images; originals remain directly downloadable |
 | File handling | Multer | Standard multipart upload middleware for Express |
 | Output validation | Zod | Schema validation for LLM JSON responses before they are trusted by the application |
 | Security middleware | Helmet, CORS, express-validator | Baseline API hardening and input validation |
-| Document parsing | pdf-parse, mammoth | Standard text extraction for PDF/DOCX |
+| Document parsing | unpdf, mammoth | Standard text extraction for PDF/DOCX |
 | OCR | Tesseract.js | Open-source OCR for scanned certificates/images |
 | LLM & embeddings | **Google Gemini API** (`gemini-2.5-flash` for classification/reasoning/generation; `gemini-embedding-001` at 768 dimensions for vector embeddings) | Single, free-tier provider covering both generation and embedding needs under one API key. `gemini-2.0-flash` and `text-embedding-004` were the original choices but were retired/left with zero free-tier quota on new API keys as of mid-2026; verified working alternatives above against a live key before implementation |
 | Secondary ingestion | Telegram Bot API, GitHub REST API (Octokit) | Official, well-documented, free APIs |
@@ -176,7 +175,7 @@ All components below are available at zero cost at hackathon scale.
                                       ▼
                  ┌───────────────────────────────────────────┐
                  │             EXTRACTION LAYER                 │
-                 │  pdf-parse / mammoth / Tesseract.js OCR       │
+                 │  unpdf / mammoth / Tesseract.js OCR       │
                  │  → normalized text + metadata                 │
                  └────────────────────┬──────────────────────┘
                                       ▼
@@ -261,10 +260,11 @@ Documented explicitly so evaluators can see known limitations were considered, n
 
 | Constraint | Detail | Mitigation |
 |---|---|---|
-| Supabase free-tier database size | 500 MB storage cap on the free Postgres instance | Sufficient for a hackathon-scale dataset (comfortably several hundred thousand embedding vectors at 768 dimensions); documented as a scaling boundary, not a functional blocker for the demo |
+| Supabase free-tier database size | 500 MB storage cap on the free Postgres instance | Sufficient for a small-to-medium dataset (comfortably several hundred thousand embedding vectors at 768 dimensions); documented as a scaling boundary, not a functional blocker for the demo |
 | Free-tier project inactivity pause | Supabase free projects pause after 7 days without activity | A scheduled keep-alive ping (or a manual restart before judging) prevents the database from being paused at evaluation time |
 | LLM output can be malformed or non-JSON | Language models occasionally return text that fails to parse as valid JSON, which would otherwise crash the ingestion pipeline | Constrained generation via `responseSchema`, defensive `try/catch` + Zod validation on every LLM call, one automatic re-prompt retry, and a safe fallback (`Uncategorized`, `needsReview: true`) so a malformed response degrades gracefully instead of failing the upload |
 | Competence scoring must be explainable | An LLM-estimated "how skilled is this person" score is unverifiable and can vary between runs | Depth score is computed with the fixed arithmetic formula in Section 6 (Module 3) over `document_entities`, not inferred by the model — reproducible, auditable, and explainable to judges in one sentence |
+| Text extraction can fail on a legitimate file | Confirmed during implementation: the original PDF parser (`pdf-parse`, unmaintained) threw `bad XRef entry` on a structurally valid, non-corrupt PDF. Any parser can fail on an encrypted, malformed, or unusually-encoded upload | Replaced with `unpdf` (actively maintained); more importantly, `document.service.js` wraps extraction in a try/catch independent of which parser is used — a failure stores the document with the original file still attached, `extractedText: null`, and `needsReview: true`, skipping classification/embedding rather than failing the upload |
 
 ---
 
@@ -294,7 +294,7 @@ Per `reference.txt`, submissions are scored as follows:
 
 ## 14. Comparative Analysis
 
-| Capability | Cloud Storage (Drive/Dropbox) | Portfolio Tools (LinkedIn/Notion) | Baseline "RAG + Storage" Hackathon Submission | **Helix** |
+| Capability | Cloud Storage (Drive/Dropbox) | Portfolio Tools (LinkedIn/Notion) | Baseline "RAG + Storage" Submission | **Helix** |
 |---|---|---|---|---|
 | File storage | Yes | Yes | Yes | Yes |
 | Automatic categorization | No | No | Yes (label only) | Yes, with confidence, verifiability, and depth scoring |

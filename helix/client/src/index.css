@@ -2,22 +2,25 @@
 
 @theme {
   --font-sans: "Inter", system-ui, "Segoe UI", Roboto, sans-serif;
+  --font-display: "Sora", "Inter", system-ui, sans-serif;
 
-  --color-ink-950: #06070d;
-  --color-ink-900: #0b0d16;
-  --color-ink-800: #12141f;
-  --color-ink-700: #1b1e2c;
-  --color-ink-600: #262a3c;
-  --color-ink-400: #6b7186;
-  --color-ink-200: #b7bccb;
-  --color-ink-50: #f4f5f9;
+  --color-ink-950: #030308;
+  --color-ink-900: #05060a;
+  --color-ink-800: #0c0e18;
+  --color-ink-700: #141724;
+  --color-ink-600: #1f2333;
+  --color-ink-400: #757c93;
+  --color-ink-200: #bcc1d1;
+  --color-ink-100: #dcdee8;
+  --color-ink-50: #f5f6fa;
 
-  --color-violet-500: #7c5cff;
   --color-violet-400: #9c85ff;
-  --color-cyan-400: #22d3ee;
-  --color-amber-400: #f5b93d;
+  --color-violet-500: #7c5cff;
+  --color-periwinkle-400: #7ba7fc;
 
   --shadow-glow: 0 0 0 1px rgba(124, 92, 255, 0.15), 0 20px 60px -20px rgba(124, 92, 255, 0.35);
+  --radius-capsule: 28px;
+  --radius-capsule-lg: 34px;
 }
 
 html,
@@ -28,23 +31,88 @@ body,
 
 body {
   margin: 0;
-  background: radial-gradient(circle at 20% -10%, #171a2b 0%, #06070d 55%), var(--color-ink-950);
+  background: var(--color-ink-900);
   color: var(--color-ink-50);
   font-family: var(--font-sans);
   -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
+}
+
+.font-display {
+  font-family: var(--font-display);
 }
 
 .glass-panel {
-  background: linear-gradient(180deg, rgba(255, 255, 255, 0.06), rgba(255, 255, 255, 0.02));
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.055), rgba(255, 255, 255, 0.015));
   border: 1px solid rgba(255, 255, 255, 0.08);
-  backdrop-filter: blur(16px);
+  backdrop-filter: blur(20px);
+}
+
+/* Heavily-rounded "capsule" card treatment, matching the reference's
+   Data Capsule cards — deep teal-to-ink gradient, soft inner glow, no HUD
+   brackets (those stay reserved for instrument-style panels like the graph). */
+.capsule-panel {
+  background: linear-gradient(160deg, rgba(124, 92, 255, 0.14) 0%, rgba(12, 14, 24, 0.9) 45%, rgba(5, 6, 10, 0.96) 100%);
+  border: 1px solid rgba(255, 255, 255, 0.09);
+  border-radius: var(--radius-capsule);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.06), 0 24px 48px -28px rgba(0, 0, 0, 0.65);
+  transition: border-color 0.3s ease, transform 0.3s ease;
+}
+
+.capsule-panel:hover {
+  border-color: rgba(124, 92, 255, 0.35);
+}
+
+/* ---------------------------------------------------------------------- */
+/* Capsule buttons — translucent frosted-glass finish, used for every       */
+/* button and nav control in the app (no flat opaque fills).                */
+/* ---------------------------------------------------------------------- */
+
+.btn-glass-primary {
+  background: linear-gradient(90deg, rgba(124, 92, 255, 0.82), rgba(123, 167, 252, 0.82));
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.3), 0 0 24px -6px rgba(124, 92, 255, 0.65);
+  color: var(--color-ink-950);
+}
+
+.btn-glass {
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.08), rgba(255, 255, 255, 0.025));
+  backdrop-filter: blur(14px);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  color: var(--color-ink-200);
+  transition: border-color 0.25s ease, color 0.25s ease, background 0.25s ease;
+}
+
+.btn-glass:hover {
+  border-color: rgba(124, 92, 255, 0.4);
+  color: var(--color-ink-50);
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.11), rgba(255, 255, 255, 0.03));
+}
+
+.btn-glass-active {
+  background: linear-gradient(180deg, rgba(124, 92, 255, 0.28), rgba(124, 92, 255, 0.12));
+  backdrop-filter: blur(14px);
+  border: 1px solid rgba(156, 133, 255, 0.5);
+  color: var(--color-ink-50);
 }
 
 .text-gradient {
-  background: linear-gradient(90deg, var(--color-violet-400), var(--color-cyan-400));
+  background: linear-gradient(90deg, var(--color-violet-400), var(--color-periwinkle-400));
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
+}
+
+/* Brighter, higher-contrast gradient reserved for the "HELIX" wordmark
+   specifically — the shared .text-gradient above reads a little muddy at the
+   small size the logo renders at. */
+.text-gradient-brand {
+  background: linear-gradient(90deg, #a78bfa, #7ba7fc);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  filter: drop-shadow(0 0 10px rgba(123, 167, 252, 0.4));
 }
 
 ::selection {
@@ -58,4 +126,182 @@ body {
 ::-webkit-scrollbar-thumb {
   background: var(--color-ink-600);
   border-radius: 999px;
+}
+
+/* ---------------------------------------------------------------------- */
+/* Starfield / nebula background system                                   */
+/* ---------------------------------------------------------------------- */
+
+@keyframes drift-a {
+  0% {
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+  50% {
+    transform: translate3d(3%, -4%, 0) scale(1.08);
+  }
+  100% {
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+}
+
+@keyframes drift-b {
+  0% {
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+  50% {
+    transform: translate3d(-4%, 3%, 0) scale(1.05);
+  }
+  100% {
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+}
+
+.starfield-root {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  overflow: hidden;
+  pointer-events: none;
+  background: radial-gradient(ellipse 120% 90% at 50% 30%, #06070d 0%, var(--color-ink-950) 55%, #020204 100%);
+  filter: brightness(0.5);
+}
+
+.starfield-star {
+  position: absolute;
+  border-radius: 999px;
+}
+
+.nebula-blob {
+  position: absolute;
+  border-radius: 999px;
+  filter: blur(70px);
+  will-change: transform;
+}
+
+/* Diagonal dust-lane band — a dense, textured streak evoking the Milky
+   Way's band of star-dust visible in the reference photography. Built from
+   a base gradient stripe plus several offset radial "cloud puffs" stacked
+   along the same diagonal so it reads as grainy dust rather than a flat
+   gradient bar. */
+.dust-lane {
+  position: absolute;
+  inset: -20% -10%;
+  background:
+    radial-gradient(ellipse 26% 14% at 78% 22%, rgba(210, 215, 255, 0.12) 0%, rgba(210, 215, 255, 0) 72%),
+    radial-gradient(ellipse 22% 12% at 68% 32%, rgba(190, 200, 255, 0.1) 0%, rgba(190, 200, 255, 0) 72%),
+    radial-gradient(ellipse 30% 15% at 58% 42%, rgba(220, 210, 255, 0.11) 0%, rgba(220, 210, 255, 0) 72%),
+    radial-gradient(ellipse 24% 13% at 46% 52%, rgba(200, 205, 255, 0.09) 0%, rgba(200, 205, 255, 0) 72%),
+    radial-gradient(ellipse 28% 14% at 34% 62%, rgba(180, 190, 255, 0.07) 0%, rgba(180, 190, 255, 0) 72%),
+    radial-gradient(ellipse 22% 12% at 24% 70%, rgba(170, 180, 255, 0.06) 0%, rgba(170, 180, 255, 0) 72%),
+    linear-gradient(
+      124deg,
+      transparent 28%,
+      rgba(180, 190, 255, 0.045) 40%,
+      rgba(205, 210, 255, 0.08) 48%,
+      rgba(180, 190, 255, 0.045) 56%,
+      transparent 68%
+    );
+  filter: blur(22px);
+}
+
+/* Warm galactic-core glow, offset like the reference's golden bloom. Two
+   stacked layers — a tight bright inner bloom plus a wider soft halo — so
+   it reads as a luminous core rather than a single soft circle. */
+.core-glow {
+  position: absolute;
+  top: 20%;
+  left: 34%;
+  width: 42vw;
+  height: 42vw;
+  border-radius: 999px;
+  background:
+    radial-gradient(circle, rgba(255, 238, 214, 0.28) 0%, rgba(255, 224, 180, 0.12) 18%, rgba(255, 200, 140, 0) 42%),
+    radial-gradient(circle, rgba(255, 200, 140, 0.16) 0%, rgba(255, 180, 120, 0.07) 32%, rgba(255, 180, 120, 0) 68%);
+  filter: blur(40px);
+}
+
+/* ---------------------------------------------------------------------- */
+/* Glowing divider line                                                    */
+/* ---------------------------------------------------------------------- */
+
+.glow-divider {
+  height: 1px;
+  width: 100%;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(84, 62, 180, 0.55) 20%,
+    rgba(123, 167, 252, 0.6) 50%,
+    rgba(84, 62, 180, 0.55) 80%,
+    transparent 100%
+  );
+  box-shadow: 0 0 8px 0 rgba(123, 167, 252, 0.22);
+}
+
+/* ---------------------------------------------------------------------- */
+/* Eyebrow label                                                           */
+/* ---------------------------------------------------------------------- */
+
+.eyebrow {
+  display: inline-flex;
+  align-items: center;
+  font-family: var(--font-display);
+  font-size: 0.6875rem;
+  font-weight: 600;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--color-ink-200);
+}
+
+.no-scrollbar {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+/* ---------------------------------------------------------------------- */
+/* React Flow theming — the library defaults to a white control panel and  */
+/* white connection handles; override every chrome element to match theme. */
+/* ---------------------------------------------------------------------- */
+
+.graph-canvas .react-flow__renderer,
+.graph-canvas .react-flow__pane {
+  background: transparent;
+}
+
+.graph-canvas .react-flow__handle {
+  opacity: 0;
+}
+
+.graph-canvas .react-flow__controls {
+  background: transparent;
+  box-shadow: none;
+  border-radius: 999px;
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+.graph-canvas .react-flow__controls-button {
+  background: rgba(12, 14, 24, 0.85);
+  backdrop-filter: blur(10px);
+  border: none;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  fill: var(--color-ink-200);
+}
+
+.graph-canvas .react-flow__controls-button:hover {
+  background: rgba(124, 92, 255, 0.25);
+  fill: var(--color-ink-50);
+}
+
+.graph-canvas .react-flow__attribution {
+  display: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .nebula-blob {
+    animation: none !important;
+  }
 }
