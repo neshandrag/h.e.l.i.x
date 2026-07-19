@@ -35,7 +35,7 @@ src/
   controllers/  request handlers
   services/     business logic:
                   ai.service.js          — Gemini classification, schema-validated, retry + fallback
-                  embedding.service.js   — Gemini text-embedding-004 wrapper
+                  embedding.service.js   — Gemini gemini-embedding-001 wrapper (768-dim output)
                   scoring.service.js     — deterministic verifiability + depth-score formulas
                   extraction.service.js  — PDF/DOCX/OCR text extraction
                   document.service.js    — full ingestion pipeline orchestration

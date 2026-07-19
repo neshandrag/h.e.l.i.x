@@ -129,7 +129,7 @@ Helix is designed to satisfy all three gaps using the specific AI techniques the
 ### Module 5 — Smart Retrieval System (Semantic Search + RAG)
 **Objective:** Provide instant natural-language access to documents and enable reasoning over the user's full history, satisfying the brief's explicit requirement for semantic search and RAG.
 **Implementation:**
-- Every document is embedded using Google Gemini's `text-embedding-004` model (768 dimensions) and indexed via **PostgreSQL's `pgvector` extension**.
+- Every document is embedded using Google Gemini's `gemini-embedding-001` model, requested at a fixed 768-dimensional output (via the `outputDimensionality` parameter, since the model's native output is 3072-dimensional), and indexed via **PostgreSQL's `pgvector` extension**.
 - Standard retrieval: natural-language queries ("show my AI projects", "show my latest resume") are embedded and matched via cosine similarity (`<=>` operator), returning ranked results with direct links to original files.
 - **Advisory retrieval (GraphRAG):** for reasoning queries ("Am I ready for a Data Science internship?"), the system combines vector search results with a graph traversal over the Relationship Engine (Module 3) — including deterministic depth scores — and passes both as context to the LLM, returning an evidence-based answer that explicitly states available proof and identified gaps, rather than a plain document list.
 
@@ -158,7 +158,7 @@ All components below are available at zero cost at hackathon scale.
 | Security middleware | Helmet, CORS, express-validator | Baseline API hardening and input validation |
 | Document parsing | pdf-parse, mammoth | Standard text extraction for PDF/DOCX |
 | OCR | Tesseract.js | Open-source OCR for scanned certificates/images |
-| LLM & embeddings | **Google Gemini API** (`gemini-2.0-flash` for classification/reasoning/generation; `text-embedding-004` for vector embeddings) | Single, free-tier provider covering both generation and embedding needs under one API key |
+| LLM & embeddings | **Google Gemini API** (`gemini-2.5-flash` for classification/reasoning/generation; `gemini-embedding-001` at 768 dimensions for vector embeddings) | Single, free-tier provider covering both generation and embedding needs under one API key. `gemini-2.0-flash` and `text-embedding-004` were the original choices but were retired/left with zero free-tier quota on new API keys as of mid-2026; verified working alternatives above against a live key before implementation |
 | Secondary ingestion | Telegram Bot API, GitHub REST API (Octokit) | Official, well-documented, free APIs |
 | Scheduled processing | node-cron | Periodic recalculation of edge decay and coherence scores |
 | Version control / CI | Git, GitHub | Required deliverable format (Code Repository) |

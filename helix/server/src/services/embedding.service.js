@@ -1,7 +1,10 @@
 const { embeddingModel } = require('../config/gemini');
 
 async function generateEmbedding(text) {
-  const result = await embeddingModel.embedContent(text.slice(0, 8000));
+  const result = await embeddingModel.embedContent({
+    content: { parts: [{ text: text.slice(0, 8000) }] },
+    outputDimensionality: 768,
+  });
   return result.embedding.values; // number[768]
 }
 
