@@ -8,7 +8,8 @@
 
 <br />
 
-**[Reference presentation](https://drive.google.com/file/d/1lZKq4jQd_KRlNsp7IG7yQ0Dzpa9iz_Vp/view?usp=sharing)** · **[Demo video](https://youtu.be/5ONEuIMZQLc)**
+**Presentation:** https://drive.google.com/file/d/1lZKq4jQd_KRlNsp7IG7yQ0Dzpa9iz_Vp/view?usp=sharing  
+**Demo video:** https://youtu.be/5ONEuIMZQLc
 
 <br />
 
