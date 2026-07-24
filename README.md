@@ -8,6 +8,10 @@
 
 <br />
 
+**[Reference presentation](https://drive.google.com/file/d/1lZKq4jQd_KRlNsp7IG7yQ0Dzpa9iz_Vp/view?usp=sharing)** · **[Demo video](https://youtu.be/5ONEuIMZQLc)**
+
+<br />
+
 ![React](https://img.shields.io/badge/React-19-61DAFB?style=for-the-badge&logo=react&logoColor=white)
 ![Vite](https://img.shields.io/badge/Vite-8-646CFF?style=for-the-badge&logo=vite&logoColor=white)
 ![Node.js](https://img.shields.io/badge/Node.js-Express-339933?style=for-the-badge&logo=node.js&logoColor=white)
