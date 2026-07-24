@@ -2,9 +2,10 @@ const cloudinary = require('../config/cloudinary');
 const prisma = require('../config/prisma');
 const { extractText } = require('./extraction.service');
 const { classifyDocument } = require('./ai.service');
-const { computeVerifiabilityScore, recomputeDepthScore } = require('./scoring.service');
+const { computeVerifiabilityScore, recomputeDepthScore, evidenceTypeFor } = require('./scoring.service');
 const { generateEmbedding, toVectorLiteral } = require('./embedding.service');
 const { buildRelationships } = require('./relationship.service');
+const { maybeAutoCreateMilestone } = require('./timeline.service');
 
 const UNREADABLE_CLASSIFICATION = {
   category: 'Academics',
@@ -14,6 +15,26 @@ const UNREADABLE_CLASSIFICATION = {
   entities: [],
   needsReview: true,
 };
+
+function parseDocumentDate(raw) {
+  if (!raw) return null;
+  const d = new Date(raw);
+  return Number.isNaN(d.getTime()) ? null : d;
+}
+
+function dedupeEntities(entities) {
+  const seen = new Set();
+  const unique = [];
+  for (const e of entities ?? []) {
+    const name = e.name?.trim();
+    if (!name) continue;
+    const key = `${e.type}::${name.toLowerCase()}`;
+    if (seen.has(key)) continue;
+    seen.add(key);
+    unique.push({ type: e.type, name });
+  }
+  return unique;
+}
 
 function uploadBufferToCloudinary(buffer, originalName) {
   return new Promise((resolve, reject) => {
@@ -63,10 +84,10 @@ async function safeExtractText(buffer, mimeType, originalName) {
 // Links extracted entities to the document as evidence and returns the resolved
 // entity records (id + type), which buildRelationships() then uses to infer
 // edges between whatever entities co-occurred on this document.
-async function linkEntities(userId, documentId, entities, evidenceDate) {
+async function linkEntities(userId, documentId, entities, evidenceDate, documentCategory) {
   const resolved = [];
 
-  for (const extracted of entities) {
+  for (const extracted of dedupeEntities(entities)) {
     // eslint-disable-next-line no-await-in-loop
     const entity = await prisma.entity.upsert({
       where: { userId_type_name: { userId, type: extracted.type, name: extracted.name } },
@@ -74,15 +95,24 @@ async function linkEntities(userId, documentId, entities, evidenceDate) {
       create: { userId, type: extracted.type, name: extracted.name },
     });
 
+    // One evidence row per (document, entity) — duplicate LLM names must not
+    // double-count toward depth score.
     // eslint-disable-next-line no-await-in-loop
-    await prisma.documentEntity.create({
-      data: {
-        documentId,
-        entityId: entity.id,
-        evidenceType: extracted.type,
-        evidenceDate,
-      },
+    const existingLink = await prisma.documentEntity.findFirst({
+      where: { documentId, entityId: entity.id },
+      select: { id: true },
     });
+    if (!existingLink) {
+      // eslint-disable-next-line no-await-in-loop
+      await prisma.documentEntity.create({
+        data: {
+          documentId,
+          entityId: entity.id,
+          evidenceType: evidenceTypeFor(documentCategory, extracted.type),
+          evidenceDate,
+        },
+      });
+    }
 
     // eslint-disable-next-line no-await-in-loop
     await recomputeDepthScore(entity.id);
@@ -104,10 +134,15 @@ async function linkEntities(userId, documentId, entities, evidenceDate) {
 async function ingestExtractedContent({ userId, fileUrl, extractedText, sourceChannel }) {
   const classification = extractedText ? await classifyDocument(extractedText) : UNREADABLE_CLASSIFICATION;
   const verifiabilityScore = extractedText
-    ? computeVerifiabilityScore({ issuer: classification.issuer, extractedText })
+    ? computeVerifiabilityScore({
+      issuer: classification.issuer,
+      extractedText,
+      sourceChannel,
+    })
     : 0;
 
-  const evidenceDate = classification.documentDate ? new Date(classification.documentDate) : new Date();
+  const documentDate = parseDocumentDate(classification.documentDate);
+  const evidenceDate = documentDate ?? new Date();
 
   const document = await prisma.document.create({
     data: {
@@ -115,6 +150,7 @@ async function ingestExtractedContent({ userId, fileUrl, extractedText, sourceCh
       fileUrl,
       extractedText,
       category: classification.category,
+      documentDate,
       confidenceScore: classification.confidence,
       verifiabilityScore,
       needsReview: classification.needsReview,
@@ -138,8 +174,15 @@ async function ingestExtractedContent({ userId, fileUrl, extractedText, sourceCh
     }
   }
 
-  const resolvedEntities = await linkEntities(userId, document.id, classification.entities, evidenceDate);
+  const resolvedEntities = await linkEntities(
+    userId,
+    document.id,
+    classification.entities,
+    evidenceDate,
+    classification.category
+  );
   await buildRelationships(resolvedEntities);
+  await maybeAutoCreateMilestone(userId, document);
 
   return { ...document, entities: classification.entities };
 }
@@ -168,13 +211,19 @@ async function reclassifyDocument(userId, documentId) {
   }
 
   const classification = await classifyDocument(document.extractedText);
-  const verifiabilityScore = computeVerifiabilityScore({ issuer: classification.issuer, extractedText: document.extractedText });
-  const evidenceDate = classification.documentDate ? new Date(classification.documentDate) : document.createdAt;
+  const verifiabilityScore = computeVerifiabilityScore({
+    issuer: classification.issuer,
+    extractedText: document.extractedText,
+    sourceChannel: document.sourceChannel,
+  });
+  const documentDate = parseDocumentDate(classification.documentDate);
+  const evidenceDate = documentDate ?? document.createdAt;
 
   const updated = await prisma.document.update({
     where: { id: documentId },
     data: {
       category: classification.category,
+      documentDate,
       confidenceScore: classification.confidence,
       verifiabilityScore,
       needsReview: classification.needsReview,
@@ -190,8 +239,15 @@ async function reclassifyDocument(userId, documentId) {
     console.warn(`[document.service] embedding regeneration failed for document ${documentId}: ${err.message}`);
   }
 
-  const resolvedEntities = await linkEntities(userId, documentId, classification.entities, evidenceDate);
+  const resolvedEntities = await linkEntities(
+    userId,
+    documentId,
+    classification.entities,
+    evidenceDate,
+    classification.category
+  );
   await buildRelationships(resolvedEntities);
+  await maybeAutoCreateMilestone(userId, updated);
 
   return { ...updated, entities: classification.entities };
 }

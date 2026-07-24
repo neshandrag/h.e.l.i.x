@@ -1,6 +1,6 @@
 const { Router } = require('express');
 const { body } = require('express-validator');
-const { register, login, telegramLinkCode } = require('../controllers/auth.controller');
+const { register, login, me, telegramLinkCode } = require('../controllers/auth.controller');
 const { requireAuth } = require('../middleware/auth.middleware');
 
 const router = Router();
@@ -12,6 +12,7 @@ const credentialValidators = [
 
 router.post('/register', credentialValidators, register);
 router.post('/login', credentialValidators, login);
+router.get('/me', requireAuth, me);
 router.post('/telegram/link-code', requireAuth, telegramLinkCode);
 
 module.exports = router;

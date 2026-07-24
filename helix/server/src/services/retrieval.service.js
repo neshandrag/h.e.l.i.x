@@ -1,5 +1,5 @@
 const prisma = require('../config/prisma');
-const { generationModel } = require('../config/gemini');
+const { generateContent } = require('../config/gemini');
 const { searchDocuments } = require('./vectorSearch.service');
 
 const ADVISORY_PROMPT = (question, evidenceSummary, entitySummary) => `You are Helix, an AI digital identity assistant. Answer the user's question
@@ -14,8 +14,13 @@ ${evidenceSummary || '(no matching documents found)'}
 Skill/entity graph (name, depth tier, depth score):
 ${entitySummary || '(no entities recorded yet)'}
 
-Respond in 3-5 sentences: state what evidence supports readiness, then state
-the concrete gap(s), if any.`;
+Format your reply for a clean UI layout:
+- Start with a short heading line: Evidence:
+- Then 2-3 sentences on what the documents and skills support.
+- Then a heading line: Gaps:
+- Then bullet points (each on its own line, starting with "- ") for missing or weak evidence.
+- If there are no gaps, write one bullet: "- No major gaps identified from the available evidence."
+Do not use markdown tables. Keep total length under 120 words.`;
 
 // The reasoning call (generateContent) is the one step here without a cheap,
 // deterministic fallback — unlike ai.service.js's classification, there's no
@@ -39,7 +44,7 @@ async function answerAdvisoryQuery(userId, question) {
 
   let answer;
   try {
-    const result = await generationModel.generateContent(ADVISORY_PROMPT(question, evidenceSummary, entitySummary));
+    const result = await generateContent(ADVISORY_PROMPT(question, evidenceSummary, entitySummary));
     answer = result.response.text();
   } catch (err) {
     console.warn(`[retrieval.service] advisory reasoning failed: ${err.message}`);

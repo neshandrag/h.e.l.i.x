@@ -9,11 +9,16 @@ const envSchema = z.object({
   JWT_EXPIRES_IN: z.string().default('7d'),
   DATABASE_URL: z.string().min(1, 'DATABASE_URL is required'),
   GEMINI_API_KEY: z.string().min(1, 'GEMINI_API_KEY is required'),
+  GEMINI_MODEL: z.string().optional(),
   CLOUDINARY_CLOUD_NAME: z.string().optional(),
   CLOUDINARY_API_KEY: z.string().optional(),
   CLOUDINARY_API_SECRET: z.string().optional(),
   TELEGRAM_BOT_TOKEN: z.string().optional(),
   GITHUB_TOKEN: z.string().optional(),
+  EMAIL_IMAP_HOST: z.string().optional(),
+  EMAIL_IMAP_PORT: z.string().optional(),
+  EMAIL_IMAP_USER: z.string().optional(),
+  EMAIL_IMAP_PASSWORD: z.string().optional(),
 });
 
 const parsed = envSchema.safeParse(process.env);

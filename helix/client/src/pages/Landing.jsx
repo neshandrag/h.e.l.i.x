@@ -77,7 +77,7 @@ export default function Landing() {
           className="pointer-events-none absolute left-1/2 top-16 -translate-x-1/2 w-[36rem] h-[36rem] rounded-full"
           style={{
             background:
-              'radial-gradient(circle, rgba(255,255,255,0.16) 0%, rgba(156,133,255,0.16) 32%, rgba(123,167,252,0.08) 55%, rgba(123,167,252,0) 72%)',
+              'radial-gradient(circle, rgba(168,230,193,0.45) 0%, rgba(46,204,113,0.12) 40%, rgba(46,204,113,0) 70%)',
             filter: 'blur(30px)',
           }}
           animate={reduceMotion ? undefined : { opacity: [0.6, 1, 0.6], scale: [0.94, 1.05, 0.94] }}

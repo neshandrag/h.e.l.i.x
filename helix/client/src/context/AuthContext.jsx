@@ -37,8 +37,16 @@ export function AuthProvider({ children }) {
     setUser(null);
   }, []);
 
+  const setUserProfile = useCallback((nextUser) => {
+    setUser((prev) => {
+      const merged = { ...(prev || {}), ...nextUser };
+      localStorage.setItem('helix_user', JSON.stringify(merged));
+      return merged;
+    });
+  }, []);
+
   return (
-    <AuthContext.Provider value={{ user, login, register, logout }}>
+    <AuthContext.Provider value={{ user, login, register, logout, setUserProfile }}>
       {children}
     </AuthContext.Provider>
   );

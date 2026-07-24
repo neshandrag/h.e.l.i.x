@@ -13,7 +13,7 @@ const CLASSIFICATION_CATEGORIES = [
   'Academics',
 ];
 
-const ENTITY_TYPES = ['SKILL', 'PROJECT', 'CERTIFICATION', 'INTERNSHIP', 'ACHIEVEMENT'];
+const ENTITY_TYPES = ['SKILL', 'PROJECT', 'CERTIFICATION', 'INTERNSHIP', 'ACHIEVEMENT', 'CAREER_PATH'];
 
 const extractedEntitySchema = z.object({
   type: z.enum(ENTITY_TYPES),
@@ -28,10 +28,16 @@ const classificationSchema = z.object({
   entities: z.array(extractedEntitySchema).default([]),
 });
 
+const inflectionPointSchema = z.object({
+  date: z.string(),
+  description: z.string(),
+});
+
 const coherenceSchema = z.object({
   coherenceScore: z.number().min(0).max(1),
   narrative: z.string(),
   discontinuities: z.array(z.string()).default([]),
+  inflectionPoints: z.array(inflectionPointSchema).default([]),
 });
 
 module.exports = {

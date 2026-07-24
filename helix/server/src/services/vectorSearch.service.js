@@ -14,6 +14,8 @@ async function searchDocuments(userId, queryText, limit = 5) {
 
   return prisma.$queryRaw`
     SELECT id, category, file_url AS "fileUrl", extracted_text AS "extractedText",
+           confidence_score AS "confidenceScore", verifiability_score AS "verifiabilityScore",
+           needs_review AS "needsReview",
            1 - (embedding <=> ${vectorLiteral}::vector) AS similarity
     FROM documents
     WHERE user_id = ${userId}::uuid AND embedding IS NOT NULL

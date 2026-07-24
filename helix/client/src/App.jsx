@@ -8,6 +8,8 @@ import Dashboard from './pages/Dashboard';
 import Graph from './pages/Graph';
 import Timeline from './pages/Timeline';
 import Ask from './pages/Ask';
+import Search from './pages/Search';
+import Public from './pages/Public';
 import AppShell from './components/AppShell';
 import ProtectedRoute from './components/ProtectedRoute';
 import StarfieldBackground from './components/StarfieldBackground';
@@ -27,6 +29,7 @@ export default function App() {
             <Route path="/" element={<Landing />} />
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />
+            <Route path="/u/:username" element={<Public />} />
 
             <Route
               element={
@@ -36,6 +39,7 @@ export default function App() {
               }
             >
               <Route path="/dashboard" element={<Dashboard />} />
+              <Route path="/search" element={<Search />} />
               <Route path="/graph" element={<Graph />} />
               <Route path="/timeline" element={<Timeline />} />
               <Route path="/ask" element={<Ask />} />

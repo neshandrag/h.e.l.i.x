@@ -2,14 +2,34 @@ const { body, validationResult } = require('express-validator');
 const prisma = require('../config/prisma');
 const ApiError = require('../utils/ApiError');
 const asyncHandler = require('../utils/asyncHandler');
-const { generateMilestoneNarrative, generateReusableContent } = require('../services/narrative.service');
+const { generateReusableContent } = require('../services/narrative.service');
+const { createMilestoneFromDocument, syncTimelineFromDocuments } = require('../services/timeline.service');
 
 const list = asyncHandler(async (req, res) => {
+  // Auto-build journey from classified docs (certs, internships, etc.) so the
+  // timeline never depends on a manual "Add to timeline" click.
+  await syncTimelineFromDocuments(req.userId);
+
   const events = await prisma.timelineEvent.findMany({
     where: { userId: req.userId },
     orderBy: { eventDate: 'asc' },
+    include: {
+      linkedDocument: {
+        select: { id: true, category: true, sourceChannel: true, fileUrl: true },
+      },
+    },
   });
-  res.json({ events });
+  res.json({
+    events: events.map((e) => ({
+      id: e.id,
+      eventDate: e.eventDate,
+      narrative: e.narrative,
+      linkedDocumentId: e.linkedDocumentId,
+      category: e.linkedDocument?.category ?? null,
+      sourceChannel: e.linkedDocument?.sourceChannel ?? null,
+      sourceUrl: e.linkedDocument?.fileUrl ?? null,
+    })),
+  });
 });
 
 // Materializes a TimelineEvent from an existing document, generating its
@@ -23,22 +43,8 @@ const createFromDocument = asyncHandler(async (req, res) => {
   });
   if (!document) throw new ApiError(404, 'Document not found');
 
-  const narrative = await generateMilestoneNarrative({
-    category: document.category,
-    extractedText: document.extractedText,
-    eventDate: document.createdAt.toISOString().slice(0, 10),
-  });
-
-  const event = await prisma.timelineEvent.create({
-    data: {
-      userId: req.userId,
-      eventDate: document.createdAt,
-      narrative,
-      linkedDocumentId: document.id,
-    },
-  });
-
-  res.status(201).json({ event });
+  const { event, created } = await createMilestoneFromDocument(req.userId, document);
+  res.status(created ? 201 : 200).json({ event, created });
 });
 
 // One-click reusable output generation (Module 4): resume bullet / LinkedIn post.
@@ -53,7 +59,7 @@ const generateContent = asyncHandler(async (req, res) => {
 
   try {
     const content = await generateReusableContent(req.body.kind, event.narrative);
-    res.json({ content });
+    res.json({ kind: req.body.kind, content });
   } catch (err) {
     throw new ApiError(503, err.message);
   }

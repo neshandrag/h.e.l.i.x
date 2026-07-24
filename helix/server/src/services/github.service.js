@@ -1,14 +1,12 @@
 const { Octokit } = require('octokit');
 const prisma = require('../config/prisma');
 const env = require('../config/env');
+const ApiError = require('../utils/ApiError');
 const { ingestExtractedContent } = require('./document.service');
 
-// Secondary ingestion channel (plan.md Section 6, Module 1): "connecting a
-// GitHub account extracts repository README content, commit history, and
-// language statistics as skill evidence." A server-level GITHUB_TOKEN (if
-// configured) raises the rate limit from 60/hr to 5000/hr; without one, the
-// import still works against public data, just capped lower.
-const MAX_REPOS = 8;
+// Cap how many repos we list for the picker and how many can be imported at once.
+const MAX_LIST = 30;
+const MAX_IMPORT = 10;
 
 function octokitClient() {
   return new Octokit(env.GITHUB_TOKEN ? { auth: env.GITHUB_TOKEN } : {});
@@ -17,6 +15,19 @@ function octokitClient() {
 function decodeReadme(readmeResponse) {
   if (!readmeResponse?.content) return '';
   return Buffer.from(readmeResponse.content, readmeResponse.encoding ?? 'base64').toString('utf-8');
+}
+
+function mapRepoSummary(repo) {
+  return {
+    name: repo.name,
+    fullName: repo.full_name,
+    description: repo.description || null,
+    language: repo.language || null,
+    stars: repo.stargazers_count ?? 0,
+    updatedAt: repo.updated_at,
+    htmlUrl: repo.html_url,
+    fork: Boolean(repo.fork),
+  };
 }
 
 async function fetchRepoEvidence(octokit, owner, repo) {
@@ -40,23 +51,70 @@ async function fetchRepoEvidence(octokit, owner, repo) {
   return extractedText;
 }
 
-/**
- * Imports a user's most recently updated public, non-fork repositories as
- * evidence documents — each repo becomes a `documents` row (sourceChannel
- * GITHUB) run through the same classification → embedding → entity-linking
- * pipeline as a manual upload (ingestExtractedContent, document.service.js).
- * Per-repo failures are isolated so one bad repo doesn't fail the whole import.
- */
-async function importGithubProfile(userId, username) {
+async function listGithubRepos(username) {
   const octokit = octokitClient();
+  let repos;
+  try {
+    const response = await octokit.rest.repos.listForUser({
+      username,
+      sort: 'updated',
+      per_page: MAX_LIST,
+      type: 'owner',
+    });
+    repos = response.data;
+  } catch (err) {
+    const msg = err.status === 404
+      ? `GitHub user not found: ${username}`
+      : `Failed to fetch GitHub repos for ${username}: ${err.message}`;
+    throw new ApiError(502, msg);
+  }
 
-  const { data: repos } = await octokit.rest.repos.listForUser({
-    username,
-    sort: 'updated',
-    per_page: MAX_REPOS,
-  });
+  const candidates = repos.filter((r) => !r.fork).map(mapRepoSummary);
+  return { username, repos: candidates };
+}
 
-  const candidates = repos.filter((r) => !r.fork).slice(0, MAX_REPOS);
+/**
+ * Imports only the repos the user selected. Each becomes a documents row
+ * (sourceChannel GITHUB) through the same ingest pipeline as uploads.
+ */
+async function importGithubProfile(userId, username, selectedRepos = []) {
+  const names = [...new Set(
+    (Array.isArray(selectedRepos) ? selectedRepos : [])
+      .map((n) => String(n || '').trim())
+      .filter(Boolean)
+  )];
+
+  if (names.length === 0) {
+    throw new ApiError(422, 'Select at least one repository to import');
+  }
+  if (names.length > MAX_IMPORT) {
+    throw new ApiError(422, `You can import at most ${MAX_IMPORT} repositories at a time`);
+  }
+
+  const octokit = octokitClient();
+  let listed;
+  try {
+    const response = await octokit.rest.repos.listForUser({
+      username,
+      sort: 'updated',
+      per_page: MAX_LIST,
+      type: 'owner',
+    });
+    listed = response.data;
+  } catch (err) {
+    const msg = err.status === 404
+      ? `GitHub user not found: ${username}`
+      : `Failed to fetch GitHub repos for ${username}: ${err.message}`;
+    throw new ApiError(502, msg);
+  }
+
+  const byName = new Map(listed.filter((r) => !r.fork).map((r) => [r.name.toLowerCase(), r]));
+  const missing = names.filter((n) => !byName.has(n.toLowerCase()));
+  if (missing.length) {
+    throw new ApiError(404, `Repository not found for ${username}: ${missing.join(', ')}`);
+  }
+
+  const candidates = names.map((n) => byName.get(n.toLowerCase()));
 
   const imported = [];
   const skipped = [];
@@ -84,4 +142,4 @@ async function importGithubProfile(userId, username) {
   return { imported, skipped, reposConsidered: candidates.length };
 }
 
-module.exports = { importGithubProfile };
+module.exports = { listGithubRepos, importGithubProfile };

@@ -26,6 +26,7 @@ enum EntityType {
   CERTIFICATION
   INTERNSHIP
   ACHIEVEMENT
+  CAREER_PATH
 }
 
 enum DepthTier {
@@ -74,6 +75,9 @@ model Document {
   fileUrl            String        @map("file_url")
   extractedText      String?       @map("extracted_text")
   category           String?
+  // Effective date extracted by classification (cert issue date, project period,
+  // etc.). Used for timeline chronology; falls back to createdAt when null.
+  documentDate       DateTime?     @map("document_date")
   confidenceScore    Float?        @map("confidence_score")
   verifiabilityScore Float?        @map("verifiability_score")
   needsReview        Boolean       @default(false) @map("needs_review")

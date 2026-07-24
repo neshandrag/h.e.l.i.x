@@ -28,14 +28,14 @@ export default function SplashScreen({ onDone }) {
               transition={{ duration: reduceMotion ? 0.1 : 0.7, ease: [0.16, 1, 0.3, 1] }}
               className="relative flex items-center justify-center w-28 h-28 rounded-full"
               style={{
-                background: 'radial-gradient(circle, rgba(124,92,255,0.35) 0%, rgba(124,92,255,0) 72%)',
+                background: 'radial-gradient(circle, rgba(46,204,113,0.22) 0%, rgba(46,204,113,0) 72%)',
               }}
             >
               <motion.img
                 src="/helix-icon-gradient.png"
                 alt=""
                 className="w-20 h-20 object-contain"
-                style={{ filter: 'drop-shadow(0 0 10px rgba(124,92,255,0.5))' }}
+                style={{ filter: 'drop-shadow(0 4px 12px rgba(46,204,113,0.35))' }}
                 initial={{ y: 6 }}
                 animate={{ y: reduceMotion ? 0 : [6, -4, 6] }}
                 transition={{ duration: 2.2, repeat: reduceMotion ? 0 : Infinity, ease: 'easeInOut' }}

@@ -4,12 +4,16 @@ const prisma = require('../config/prisma');
 // Skill, Skill → Project, Project → Internship"). When two entity types below
 // co-occur as evidence on the same document, a typed edge is created/reinforced
 // between them. Order matters: [fromType, toType, edgeType].
+// Brief Module 3: Certification → Skill → Project → Internship → Career Path.
 const EDGE_RULES = [
   ['CERTIFICATION', 'SKILL', 'CERTIFIES'],
   ['SKILL', 'PROJECT', 'APPLIES_TO'],
   ['SKILL', 'INTERNSHIP', 'APPLIES_TO'],
   ['PROJECT', 'INTERNSHIP', 'LED_TO'],
   ['INTERNSHIP', 'ACHIEVEMENT', 'LED_TO'],
+  ['INTERNSHIP', 'CAREER_PATH', 'LED_TO'],
+  ['PROJECT', 'CAREER_PATH', 'LED_TO'],
+  ['ACHIEVEMENT', 'CAREER_PATH', 'LED_TO'],
 ];
 
 const WEIGHT_INCREMENT = 0.25;

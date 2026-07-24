@@ -47,7 +47,7 @@ export default function Login() {
             required
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            className="w-full mb-4 rounded-full bg-ink-800 border border-white/10 px-5 py-2.5 text-sm outline-none focus:border-violet-400 transition-colors"
+            className="w-full mb-4 rounded-full bg-ink-800 border border-ink-600 px-5 py-2.5 text-sm outline-none focus:border-violet-500 transition-colors"
           />
 
           <label className="block text-xs text-ink-400 mb-1.5 ml-1">Password</label>
@@ -56,7 +56,7 @@ export default function Login() {
             required
             value={password}
             onChange={(e) => setPassword(e.target.value)}
-            className="w-full mb-5 rounded-full bg-ink-800 border border-white/10 px-5 py-2.5 text-sm outline-none focus:border-violet-400 transition-colors"
+            className="w-full mb-5 rounded-full bg-ink-800 border border-ink-600 px-5 py-2.5 text-sm outline-none focus:border-violet-500 transition-colors"
           />
 
           {error && <p className="text-red-400 text-xs mb-4 ml-1">{error}</p>}

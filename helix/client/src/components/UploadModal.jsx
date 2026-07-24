@@ -49,7 +49,7 @@ export default function UploadModal({ open, onClose, onUploaded }) {
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
-          className="fixed inset-0 z-[90] flex items-center justify-center bg-black/60 backdrop-blur-sm px-4"
+          className="fixed inset-0 z-[90] flex items-center justify-center bg-ink-950/40 backdrop-blur-sm px-4"
           onClick={handleClose}
         >
           <motion.div
@@ -108,7 +108,7 @@ export default function UploadModal({ open, onClose, onUploaded }) {
                   onDrop={handleDrop}
                   onClick={() => inputRef.current?.click()}
                   className={`rounded-[var(--radius-capsule-lg)] border-2 border-dashed p-10 text-center cursor-pointer transition-colors ${
-                    dragging ? 'border-violet-400/80 bg-violet-500/5' : 'border-white/12'
+                    dragging ? 'border-violet-500 bg-violet-500/5' : 'border-ink-600'
                   }`}
                 >
                   <input

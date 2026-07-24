@@ -1,9 +1,9 @@
 // public/helix-icon.png is a flat, fully-opaque icon (light glyph on a solid
 // dark background, no real alpha channel) with a lot of empty padding around
 // the actual glyph. This derives transparency from luminance relative to the
-// background tone, recolors the glyph with the brand gradient (violet-500 ->
-// cyan-400, top to bottom of the glyph's own bounding box), and crops to that
-// bounding box so the icon fills its rendered size instead of mostly padding.
+// background tone, recolors the glyph with the brand gradient (emerald accent
+// -> soft green), and crops to that bounding box so the icon fills its
+// rendered size instead of mostly padding.
 // Run with:
 //   node scripts/recolor-icon.js
 // Requires `pngjs` (installed as a dev dependency).
@@ -17,23 +17,22 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const SRC = path.join(__dirname, '..', 'public', 'helix-icon.png');
 const OUT = path.join(__dirname, '..', 'public', 'helix-icon-gradient.png');
 
-const TOP = [167, 139, 250]; // bright violet (Tailwind violet-400)
-const BOTTOM = [123, 167, 252]; // periwinkle blue, sampled exactly from backgroundreference.png
-const PADDING = 6; // px of transparent margin kept around the cropped glyph
+// Theme accent: --accent #2ECC71 → --accent-2 #A8E6C1
+const TOP = [46, 204, 113];
+const BOTTOM = [168, 230, 193];
+const PADDING = 6;
 
 const src = PNG.sync.read(fs.readFileSync(SRC));
 
-// Sample the corner as the background tone to key transparency against.
 const bgLuminance = 0.2126 * src.data[0] + 0.7152 * src.data[1] + 0.0722 * src.data[2];
 
 function alphaAt(x, y) {
   const i = (src.width * y + x) << 2;
   const luminance = 0.2126 * src.data[i] + 0.7152 * src.data[i + 1] + 0.0722 * src.data[i + 2];
   const rawAlpha = Math.max(0, Math.min(1, (luminance - bgLuminance) / (255 - bgLuminance)));
-  return rawAlpha ** 0.6; // gamma-boost so thin outline strokes stay solid at small render sizes
+  return rawAlpha ** 0.6;
 }
 
-// Pass 1: find the glyph's bounding box (any pixel with meaningful alpha).
 let minX = src.width;
 let maxX = 0;
 let minY = src.height;
@@ -57,7 +56,6 @@ const outW = glyphW + PADDING * 2;
 const outH = glyphH + PADDING * 2;
 const out = new PNG({ width: outW, height: outH });
 
-// Pass 2: recolor + composite into the cropped, padded canvas.
 for (let y = 0; y < glyphH; y += 1) {
   const t = y / (glyphH - 1);
   const r = Math.round(TOP[0] + (BOTTOM[0] - TOP[0]) * t);
