@@ -8,7 +8,19 @@ const { notFoundHandler, errorHandler } = require('./middleware/errorHandler');
 const app = express();
 
 app.use(helmet());
-app.use(cors({ origin: env.CLIENT_ORIGIN, credentials: true }));
+// CLIENT_ORIGIN may be a single URL or comma-separated list (local + Render).
+const allowedOrigins = env.CLIENT_ORIGIN.split(',').map((s) => s.trim()).filter(Boolean);
+app.use(
+  cors({
+    origin(origin, callback) {
+      if (!origin || allowedOrigins.includes('*') || allowedOrigins.includes(origin)) {
+        return callback(null, true);
+      }
+      return callback(null, false);
+    },
+    credentials: true,
+  })
+);
 app.use(express.json({ limit: '2mb' }));
 
 app.use('/api', routes);
