@@ -22,6 +22,17 @@ npx prisma migrate dev --name init   # creates all tables except the vector colu
 npm run dev   # starts the API on http://localhost:5000
 ```
 
+## Production
+
+Live API: [https://h-e-l-i-x-r2po.onrender.com](https://h-e-l-i-x-r2po.onrender.com) · Health: `/api/health`
+
+| Variable | Value |
+|:---------|:------|
+| `CLIENT_ORIGIN` | `https://h-e-l-i-x-peach.vercel.app` |
+| Start command | `npx prisma generate && npx prisma db push && npm start` |
+
+Frontend (Vercel) must use `VITE_API_URL=https://h-e-l-i-x-r2po.onrender.com/api`. See root [`README.md`](../../README.md#live-deployment).
+
 ## Why a separate SQL step for the vector column
 
 Prisma has no native `vector` type, so `embedding` is declared as `Unsupported("vector(768)")` in `prisma/schema.prisma` and is intentionally excluded from `prisma migrate`. `prisma/sql/enable_vector.sql` adds the column and its `ivfflat` cosine-similarity index directly. This is documented explicitly (see `plan.md`, Section 9) rather than hidden, since it's the one place the ORM and the vector database diverge.

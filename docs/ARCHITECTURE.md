@@ -110,3 +110,13 @@ Timeline events are user-materialized from a document (`POST /api/timeline`); `n
 ## Data model
 
 See `helix/server/prisma/schema.prisma` for the authoritative definitions (`User`, `Document`, `Entity`, `DocumentEntity`, `Relationship`, `TimelineEvent`). `depthScore`/`depthTier` on `Entity` and `weight` on `Relationship` are both derived columns, recomputed from `document_entities` — any reviewer can re-derive them from the raw evidence rows using the formula above, rather than trusting an opaque stored number.
+
+## Live deployment
+
+| Layer | Host | URL |
+|:------|:-----|:----|
+| Frontend | Vercel | https://h-e-l-i-x-peach.vercel.app |
+| API | Render | https://h-e-l-i-x-r2po.onrender.com |
+| Database | Supabase | Postgres + pgvector |
+
+Production env: Vercel `VITE_API_URL=https://h-e-l-i-x-r2po.onrender.com/api` · Render `CLIENT_ORIGIN=https://h-e-l-i-x-peach.vercel.app`. Full deploy notes: root [`README.md`](../README.md#live-deployment).
