@@ -153,12 +153,12 @@ Helix uses **Vercel** (frontend) + **Render** (backend) + **Supabase** (Postgres
 | Service | Host | URL |
 |:--------|:-----|:----|
 | Frontend | [Vercel](https://vercel.com) | [h-e-l-i-x-peach.vercel.app](https://h-e-l-i-x-peach.vercel.app/) |
-| Backend | [Render](https://render.com) | `https://helix-api.onrender.com` |
+| Backend | [Render](https://render.com) | [h-e-l-i-x-r2po.onrender.com](https://h-e-l-i-x-r2po.onrender.com) |
 | Database | [Supabase](https://supabase.com) | Postgres + `pgvector` |
 
 | Host | Variable | Example | Purpose |
 |:-----|:---------|:--------|:--------|
-| Vercel | `VITE_API_URL` | `https://helix-api.onrender.com/api` | API base at build time |
+| Vercel | `VITE_API_URL` | `https://h-e-l-i-x-r2po.onrender.com/api` | API base at build time |
 | Render | `CLIENT_ORIGIN` | `https://h-e-l-i-x-peach.vercel.app` | CORS (exact origin, no trailing slash) |
 | Render | `DATABASE_URL` | `postgresql://…` | Supabase connection |
 | Render | `JWT_SECRET` | long random string | Auth tokens |
@@ -184,7 +184,7 @@ Helix uses **Vercel** (frontend) + **Render** (backend) + **Supabase** (Postgres
 | Framework | Vite |
 | Build | `npm run build` |
 | Output | `dist` |
-| Env | `VITE_API_URL=https://helix-api.onrender.com/api` |
+| Env | `VITE_API_URL=https://h-e-l-i-x-r2po.onrender.com/api` |
 
 ---
 
@@ -243,7 +243,7 @@ npm run dev               # http://localhost:5173
 |:---------|:--------:|:--------|:------------|
 | `VITE_API_URL` | Yes* | `http://localhost:5000/api` | Backend API base URL |
 
-\* Required on Vercel — must point at Render (`https://helix-api.onrender.com/api`).
+\* Required on Vercel — must point at Render (`https://h-e-l-i-x-r2po.onrender.com/api`).
 
 ---
 

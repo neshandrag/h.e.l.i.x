@@ -1,7 +1,13 @@
 import axios from 'axios';
 
+function resolveApiBase() {
+  const raw = (import.meta.env.VITE_API_URL || 'http://localhost:5000/api').trim().replace(/\/$/, '');
+  // Accept either https://host/api or https://host — always hit the Express /api mount.
+  return raw.endsWith('/api') ? raw : `${raw}/api`;
+}
+
 const api = axios.create({
-  baseURL: import.meta.env.VITE_API_URL ?? 'http://localhost:5000/api',
+  baseURL: resolveApiBase(),
 });
 
 api.interceptors.request.use((config) => {

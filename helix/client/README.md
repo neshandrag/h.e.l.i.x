@@ -15,9 +15,17 @@ React (Vite) frontend for Helix — see [`plan.md`](../../plan.md) at the reposi
 
 ```bash
 npm install
-cp .env.example .env   # set VITE_API_URL if the server isn't on localhost:5000
+cp .env.example .env   # local: VITE_API_URL=http://localhost:5000/api
 npm run dev             # http://localhost:5173
 ```
+
+### Environment
+
+| Variable | Local | Production (Vercel) |
+|:---------|:------|:--------------------|
+| `VITE_API_URL` | `http://localhost:5000/api` | `https://h-e-l-i-x-r2po.onrender.com/api` |
+
+Keep `helix/client/.env` on **localhost** for local work. Set the Render URL only in the **Vercel** project env, then redeploy.
 
 ## Structure
 

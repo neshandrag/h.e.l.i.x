@@ -2,8 +2,8 @@
 # https://render.com/docs/blueprint-spec
 #
 # After first deploy, set secret env vars in the Render dashboard, then
-# set helix-api CLIENT_ORIGIN to the helix-web URL and helix-web
-# VITE_API_URL to https://<helix-api-host>/api, then redeploy the static site.
+# set helix-api CLIENT_ORIGIN to https://h-e-l-i-x-peach.vercel.app and
+# Vercel VITE_API_URL to https://h-e-l-i-x-r2po.onrender.com/api, then redeploy.
 
 services:
   - type: web
