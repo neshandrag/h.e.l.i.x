@@ -6,10 +6,7 @@
 
 **Your growth, connected — not a pile of files.**
 
-<br />
 
-**Presentation:** https://drive.google.com/file/d/1lZKq4jQd_KRlNsp7IG7yQ0Dzpa9iz_Vp/view?usp=sharing  
-**Demo video:** https://youtu.be/5ONEuIMZQLc
 
 <br />
 
